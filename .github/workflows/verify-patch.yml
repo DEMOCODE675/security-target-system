@@ -1,0 +1,32 @@
+name: Verify Agent Mitigation Patch
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "security_patches/**"
+
+jobs:
+  validate-security-patch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out patch branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Syntax & Lint Validation
+        run: |
+          python -m py_compile security_patches/*.py
+          echo "Bytecode compilation passed."
+
+      - name: Dry-Run Sandbox Simulation
+        run: |
+          for script in security_patches/*.py; do
+            echo "Executing dry-run on $script"
+            python "$script"
+          done
